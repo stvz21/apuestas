@@ -11,12 +11,13 @@ import notifcar
 class Scraping:
 
     def __init__(self):
-        self.driver = webdriver.Chrome('chromedriver87')
         self.notify = notifcar.Notificar()
-        #notify.mensaje('Nuevo Bot')
-
+        #self.notify.escucha()
+        self.driver = webdriver.Chrome('chromedriver87')
+        self.driver.set_window_position(-10000,0)
+            
     def surbetFormula(self, data, casa):
-        print(data)
+        #print(data)
         try:
             for jugador in data:
                 jg1Puntos = float(jugador['puntos1'])
@@ -24,12 +25,12 @@ class Scraping:
                 # Realizo el calculo
                 oper = round((1/jg1Puntos) + (1/jg2Puntos), 2)
                 porcentaje = round(((1/oper) * 100) - 100, 0)
-                if(oper < 1):
+                if(oper < 1.00):
                     self.notify.mensaje('\U0001F3C6 *{} - {}* \U0001F3C6 \nHay un Surebet para {} puntos: {} vs {} puntos: {} = {}%'.format(
                         casa, jugador['categoria'], jugador['nombre1'], jugador['puntos1'], jugador['nombre2'], jugador['puntos2'], porcentaje))
         except:
             self.notify.mensaje(
-                '{} Error al aplicar formula para los datos de *Megapuesta*')
+                'No se pudo aplicar la formula para {}'.format(casa))
 
         pass
 
@@ -37,11 +38,10 @@ class Scraping:
         self.driver.get("https://www.megapuesta.co/#/")
         miLista = []
         try:
-            sleep(8)
+            sleep(5)
             menu = self.driver.find_elements_by_xpath(
                 '//*[@id="widget-W1J5R5Z0G5A6D4L9L4B0172"]/div/div[2]/div[1]/ul/li')
             cantMenu = len(menu)
-
             menuID = random.randrange(cantMenu)
             if menuID == 0:
                 menuID += 1
@@ -50,7 +50,7 @@ class Scraping:
                 '//*[@id="widget-W1J5R5Z0G5A6D4L9L4B0172"]/div/div[2]/div[1]/ul/li[{}]/a'.format(menuID))[0]
             categoria = btnMenu.get_attribute('innerHTML')
             btnMenu.click()
-            sleep(3)
+            sleep(6)
             contenido = self.driver.find_elements_by_xpath(
                 '//div[@id="widget-W1J5R5Z0G5A6D4L9L4B0172"]/div/div[2]/div[2]/div')
 
@@ -196,7 +196,7 @@ class Scraping:
             categoria = btnMenu.find_element_by_xpath('.//span').text
             print(categoria)
             btnMenu.click()
-            sleep(3)
+            sleep(5)
             contenido = self.driver.find_elements_by_xpath('//*[@id="wrapper"]/main/div/div/div/div[2]/div/div[2]/div/div[2]/div/div[3]/div')
 
             for jugadores in contenido:
@@ -219,11 +219,11 @@ class Scraping:
     def finalizarSession(self):
         self.driver.close()
 
-
 # BLOQUE PRINCIPAL
 scraping = Scraping()
-# scraping.megapuesta()
-# scraping.wplay()
-# scraping.rushbet()
-scraping.yajuegos()
+while True:
+    scraping.megapuesta()
+    scraping.wplay()
+    scraping.rushbet()
+    scraping.yajuegos()
 scraping.finalizarSession()
